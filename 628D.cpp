@@ -1,81 +1,60 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define ar array
 #define ll long long
-#define lli long long int
-#define ld long double
-#define sza(x) ((int)x.size())
 #define all(a) (a).begin(), (a).end()
-#define rall(a) (a).rbegin(),(a).rend()
-
-#define min_a(a,n) *min_element(a,a+n)
-#define max_a(a,n) *max_element(a,a+n)
-#define forn(i,a,n,c) for(ll i = a;i < n;i += c)
-#define fornd(i,a,n,c) for(ll i = a;i >= n;--c)
-#define ins(n) insert(n)
-#define pb(n) push_back(n)
-#define mp(val,ind) make_pair(val,ind) 
+#define vi vector<ll>
+#define pi pair<ll,ll>
+#define pii pair<ll,pair<ll,ll>>
 #define fi first
 #define se second
 #define gcd __gcd
-#define getl(s) getline(cin, s);
-#define setpre(x) fixed << setprecision(x)
-#define mset(a) memset(a, 0, sizeof(a))
+#define mset(a,v) memset(a, v, sizeof(a))
 #define endl '\n'
 #define spc " "
 
-const int MAX_N = 1e6 + 5;
-const int MAX_N_2 = 1e4 + 5;
-const ll MOD = 1e9 + 7;
-const ll INF = 1e9;
-const ld EPS = 1e-9;
+const int MN1 = 1e6 + 5,MN2 = 1e4 + 5,LOG = 27;
+const ll MOD = 1e9 + 7,INF = 1e9;
+ll m,d,dp[2005][2005][2][2];
+string l,r; 
 
-int n,m,d,dp[2007][2][2][2007];
-string a,b;
-
-int calc(int pos,bool fa,bool fb,int num){
-  num %= m;
-  if(pos == n+1) return (num % m == 0);
-  int &res = dp[pos][fa][fb][num];
+ll f(ll i,ll mod,bool fl,bool fr){
+  if(i == r.size()) return (mod == 0); 
+  ll &res = dp[i][mod][fl][fr];
   if(res != -1) return res; 
-  res = 0;
-  if(pos % 2 == 0){
-    int l = 0,h = 9;
-    if(fa == true) l = a[pos] - '0'; 
-    if(fb == true) h = b[pos] - '0';
-    if(l > d || d > h) return 0;
-    bool nfa = 0,nfb = 0;
-    if(d == a[pos] - '0' && fa == true) nfa = true; 
-    if(d == b[pos] - '0' && fb == true) nfb = true; 
-    res += calc(pos+1,nfa,nfb,(num*10 + d) % m);
-    res %= MOD;
-  }else{
-    int l = 0,h = 9;
-    if(fa == true) l = a[pos] - '0'; 
-    if(fb == true) h = b[pos] - '0';
-    for(int i = l;i <= h;++i){
-      bool nfa = false,nfb = false; 
-      if(i == l && fa == true) nfa = true; 
-      if(i == h && fb == true) nfb = true;
-      res += calc(pos+1,nfa,nfb,(num*10+i)%m);
+  res = 0; 
+  if(!(i&1)){
+    for(ll digit = 0;digit <= 9;++digit){
+      if(digit == d) continue;
+      if(!fl && (digit < l[i] - '0')) continue; 
+      if(!fr && (digit > r[i] - '0')) continue; 
+      bool nfl = (fl | (digit > l[i] - '0')),
+           nfr = (fr | (digit < r[i] - '0'));
+      res += f(i + 1,(mod*10 + digit) % m,nfl,nfr);
       res %= MOD;
     }
+  }else{
+    if(!fl && (d < l[i] - '0')) return 0;
+    if(!fr && (d > r[i] - '0')) return 0;
+    bool nfl = (fl | (d > l[i] - '0')),
+         nfr = (fr | (d < r[i] - '0'));
+    res += f(i + 1,(mod*10 + d) % m,nfl,nfr);
+    res %= MOD;
   }
-  return res % MOD; 
+  return res;
 }
 
+void solve(){
+  cin>>m>>d>>l>>r;
+  while(l.size() < r.size()) l = '0' + l;
+  mset(dp,-1);
+  cout<<f(0,0,false,false);
+}
 
-int main(){
+signed main(){
   cin.tie(0) -> sync_with_stdio(0);
-
   //freopen("i.inp","r",stdin);
   //freopen("o.out","w",stdout);
-
-  cin>>m>>d>>a>>b; 
-  int n = a.size(); 
-  memset(dp,-1,sizeof dp);
-  cout<<calc(1,1,1,0)<<endl;
-  return 0;
+  ll t = 1; //cin>>t;
+  while(t--) solve();
 }
-
